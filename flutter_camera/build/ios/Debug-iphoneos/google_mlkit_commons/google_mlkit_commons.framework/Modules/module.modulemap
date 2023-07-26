@@ -1,6 +1,0 @@
-framework module google_mlkit_commons {
-  umbrella header "google_mlkit_commons-umbrella.h"
-
-  export *
-  module * { export * }
-}
