@@ -1,0 +1,6 @@
+framework module google_mlkit_barcode_scanning {
+  umbrella header "google_mlkit_barcode_scanning-umbrella.h"
+
+  export *
+  module * { export * }
+}
