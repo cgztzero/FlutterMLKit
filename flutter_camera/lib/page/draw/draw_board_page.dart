@@ -56,21 +56,10 @@ class _DrawBoardPageState extends State<DrawBoardPage> {
                       ..isAntiAlias = true
                       ..strokeWidth = _strokeWidth
                       ..strokeCap = StrokeCap.round));
-
-                // points.add();
               });
             },
             onPanEnd: (DragEndDetails detail) {
               debugPrint('onPanEnd');
-              // setState(() {
-              //   points.add(_DrawingPoint(
-              //       detail.localPosition,
-              //       Paint()
-              //         ..color = _selectColor
-              //         ..isAntiAlias = true
-              //         ..strokeWidth = _strokeWidth
-              //         ..strokeCap = StrokeCap.round));
-              // });
             },
             child: CustomPaint(
               painter: _DrawingPainter(points),

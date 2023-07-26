@@ -2,8 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_camera/page/scan/scan_code_result_page.dart';
 
-import '../../qrcode/barcode_scanner_view.dart';
-import '../../qrcode/qrcode_scan_view.dart';
+import 'qrcode_scan_view.dart';
 
 ///function:
 ///@author:zhangteng

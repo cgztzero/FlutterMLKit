@@ -45,7 +45,7 @@ class _CameraPageState extends State<CameraPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final image = await _controller!.takePicture();
-          Navigator.push(context,CupertinoPageRoute(builder: (cxt){
+          Navigator.push(context, CupertinoPageRoute(builder: (cxt) {
             return ImageResultPage(path: image.path);
           }));
         },
