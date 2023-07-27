@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
@@ -22,12 +21,24 @@ class ScanQRCodeView extends StatefulWidget {
   State<ScanQRCodeView> createState() => ScanQRCodeViewState();
 }
 
-class ScanQRCodeViewState extends State<ScanQRCodeView> {
+class ScanQRCodeViewState extends State<ScanQRCodeView> with SingleTickerProviderStateMixin {
   final List<CameraDescription> _cameras = [];
   final BarcodeScanner _barcodeScanner = BarcodeScanner();
   CameraController? _controller;
   int _currentCameraIndex = -1; //当前所选的摄像头
   bool _isChangingCameraLens = false;
+  late AnimationController _focusController;
+  double _focusX = 0, _focusY = 0;
+  bool _showFocusIcon = false;
+  final double _focusIconWidth = 100;
+  ImagePicker? _imagePicker;
+
+  int _currentFlashIndex = 0;
+  final flashModeArray = [
+    Icons.flash_auto,
+    Icons.flash_on,
+    Icons.flash_off,
+  ];
 
   double _currentZoomLevel = 1.0;
   double _minAvailableZoom = 1.0;
@@ -44,6 +55,7 @@ class ScanQRCodeViewState extends State<ScanQRCodeView> {
   void initState() {
     super.initState();
     _initCamera();
+    _initAnimation();
   }
 
   @override
@@ -62,6 +74,9 @@ class ScanQRCodeViewState extends State<ScanQRCodeView> {
                           onScaleUpdate: (detail) {
                             _zoom(detail);
                           },
+                          onTapUp: (detail) {
+                            _calculateFocusPoint(detail);
+                          },
                           child: CameraPreview(_controller!)),
                 ),
                 Positioned(
@@ -71,13 +86,64 @@ class ScanQRCodeViewState extends State<ScanQRCodeView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [_switchLiveCameraToggle(), _selectFromAlbumIcon(), _switchFlashModeToggle()],
+                    )),
+                Positioned(
+                    left: _focusX - 40,
+                    top: _focusY - 40,
+                    child: Opacity(
+                      opacity: _showFocusIcon ? 1 : 0,
+                      child: ScaleTransition(
+                        scale: Tween(begin: 1.0, end: 0.5).animate(_focusController),
+                        child: SizedBox(
+                          width: _focusIconWidth,
+                          height: _focusIconWidth,
+                          child: Icon(
+                            Icons.filter_center_focus_rounded,
+                            color: Colors.green,
+                            size: _focusIconWidth,
+                          ),
+                        ),
+                      ),
                     ))
               ],
             ),
           );
   }
 
-  ImagePicker? _imagePicker;
+  void _initAnimation() {
+    _focusController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+  }
+
+  void _calculateFocusPoint(TapUpDetails detail) async {
+    if (_showFocusIcon) {
+      return;
+    }
+    _focusX = detail.localPosition.dx;
+    _focusY = detail.localPosition.dy;
+    setState(() {
+      _showFocusIcon = true;
+    });
+    await Future.delayed(Duration.zero);
+    _focusController.forward();
+
+    double fullWidth = MediaQuery.of(context).size.width;
+    double cameraHeight = fullWidth * _controller!.value.aspectRatio;
+
+    double xp = _focusX / fullWidth;
+    double yp = _focusY / cameraHeight;
+
+    Offset point = Offset(xp, yp);
+    _controller!.setFocusPoint(point);
+
+    Future.delayed(const Duration(seconds: 1)).then((value) {
+      if (mounted) {
+        setState(() {
+          _showFocusIcon = false;
+          _focusController.reset();
+        });
+      }
+    });
+  }
 
   Widget _selectFromAlbumIcon() {
     return SizedBox(
@@ -96,7 +162,6 @@ class ScanQRCodeViewState extends State<ScanQRCodeView> {
   }
 
   bool _isSelectingPhoto = false;
-
   void _selectPhoto() async {
     _isSelectingPhoto = true;
     _imagePicker ??= ImagePicker();
@@ -138,13 +203,6 @@ class ScanQRCodeViewState extends State<ScanQRCodeView> {
           ),
         )
       : Container();
-
-  int _currentFlashIndex = 0;
-  final flashModeArray = [
-    Icons.flash_auto,
-    Icons.flash_on,
-    Icons.flash_off,
-  ];
 
   Widget _switchFlashModeToggle() => SizedBox(
         width: 50,
@@ -316,12 +374,12 @@ class ScanQRCodeViewState extends State<ScanQRCodeView> {
     // }
   }
 
-  void resumePreview(){
+  void resumePreview() {
     _isProcessImage = false;
     _controller?.resumePreview();
   }
 
-  void pausePreview(){
+  void pausePreview() {
     _controller?.pausePreview();
   }
 

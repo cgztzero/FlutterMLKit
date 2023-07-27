@@ -64,7 +64,7 @@ class _DrawBoardPageState extends State<DrawBoardPage> {
             child: CustomPaint(
               painter: _DrawingPainter(points),
               child: SizedBox(
-                height: MediaQuery.of(context).size.height - 50,
+                height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
               ),
             ),
