@@ -95,22 +95,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text('Easy Scanning QRCode'),
                   )),
             ),
-            SizedBox(
-              width: 200,
-              child: ElevatedButton(
-                  onPressed: () async {
-                    bool isOK = await _requestCameraPermission();
-                    if (!isOK) {
-                      return;
-                    }
-                    Navigator.push(context, CupertinoPageRoute(builder: (cxt) {
-                      return DrawBoardPage();
-                    }));
-                  },
-                  child: const Center(
-                    child: Text('draw board'),
-                  )),
-            )
           ],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
